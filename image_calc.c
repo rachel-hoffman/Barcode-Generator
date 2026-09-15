@@ -23,5 +23,9 @@ int main(int argc, char** argv){
     // Save to file
     saveimage(filepath, barcodeImg);
 
+    // Free mallocs from barcode
+    free(barcodeImg->pixels);
+    free(barcodeImg);
+
     return 0;
 }

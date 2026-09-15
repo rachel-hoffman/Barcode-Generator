@@ -2,58 +2,7 @@
 #include <stdio.h>
 
 
-struct image* barcode(char* data, int width, int height) {
-    // Allocate image structure size
-    struct image* imageOutput = malloc(sizeof(struct image));
-    
-    int x = 0;
-
-    // Allocate pixel/image size
-    imageOutput->pixels = malloc(width * height * sizeof(struct pixel));
-
-    // Initialize image fields
-    imageOutput->width = width;
-    imageOutput->height = height;
-    
-    // Convert each digits into its barcode form
-    
-    for (int i=0; i < width; i++){ // Setting everything to white so we dont get nonsense values later, by cycling through all pixels
-        whiteBar(imageOutput, i);
-    }
-
-    //Start sequence
-    quietZone(imageOutput, x);
-    x += 9;
-    startEndSequence(imageOutput, x);
-    x += 3;
-    // Loop through digits and set barcode value
-    for (int i=0; i < 12; i++){
-        // Add the middle section in after the 6th digit
-        if(i == 6){
-            middleBit(imageOutput, x);
-            // Advance 5 stripes
-            x += 5;
-        }
-        // Get 7-bit value of the digit
-        int mask = getBit(data[i] - '0');
-        // Check which half we are in
-        if (i >= 6){
-            mask = mask ^ 0b1111111;
-        }
-        // Make bars white/black for each bit
-        fillDigit(imageOutput, mask, x);
-        x += 7;
-    }
-    // End sequence
-    startEndSequence(imageOutput, x);
-    x += 3;
-    quietZone(imageOutput, x);
-    x += 9;
-
-    // Return final image
-    return imageOutput;
-}
-
+// Helper functions
 void whiteBar(struct image* imageOutput, int index){
     int width = imageOutput->width;
     int height = imageOutput->height;
@@ -85,7 +34,6 @@ void fillDigit(struct image* imageOutput, int mask, int start){
         }
     }
 }
-
 
 int getBit(int digit){
     // Return bits mask of each digit
@@ -150,3 +98,57 @@ void startEndSequence(struct image* imageOutput, int start){
         }
     }
 }
+
+// Main function
+struct image* barcode(char* data, int width, int height) {
+    // Allocate image structure size
+    struct image* imageOutput = malloc(sizeof(struct image));
+    
+    int x = 0;
+
+    // Allocate pixel/image size
+    imageOutput->pixels = malloc(width * height * sizeof(struct pixel));
+
+    // Initialize image fields
+    imageOutput->width = width;
+    imageOutput->height = height;
+    
+    // Convert each digits into its barcode form
+    
+    for (int i=0; i < width; i++){ // Setting everything to white so we dont get nonsense values later, by cycling through all pixels
+        whiteBar(imageOutput, i);
+    }
+
+    //Start sequence
+    quietZone(imageOutput, x);
+    x += 9;
+    startEndSequence(imageOutput, x);
+    x += 3;
+    // Loop through digits and set barcode value
+    for (int i=0; i < 12; i++){
+        // Add the middle section in after the 6th digit
+        if(i == 6){
+            middleBit(imageOutput, x);
+            // Advance 5 stripes
+            x += 5;
+        }
+        // Get 7-bit value of the digit
+        int mask = getBit(data[i] - '0');
+        // Check which half we are in
+        if (i >= 6){
+            mask = mask ^ 0b1111111;
+        }
+        // Make bars white/black for each bit
+        fillDigit(imageOutput, mask, x);
+        x += 7;
+    }
+    // End sequence
+    startEndSequence(imageOutput, x);
+    x += 3;
+    quietZone(imageOutput, x);
+    x += 9;
+
+    // Return final image
+    return imageOutput;
+}
+
